@@ -6,15 +6,22 @@ import pandas as pd
 
 
 def frequency_table(df):
-    """Generate a one-way frequency table for manufacturers."""
-    # Simple counts
-    manufacturer_counts = df['manufacturer'].value_counts().reset_index()
-    manufacturer_counts.columns = ['Manufacturer', 'Count']
+    """Summarize selling price by manufacturer."""
+    summary = (
+        df.groupby("manufacturer", as_index=False)["selling_price"]
+        .sum()
+        .rename(
+            columns={
+                "manufacturer": "Manufacturer",
+                "selling_price": "Total Selling Price",
+            }
+        )
+    )
 
-    # Convert to HTML using the correct method name: .to_html()
-    table_html = manufacturer_counts.to_html(
+    table_html = summary.to_html(
         classes="table table-bordered table-striped table-sm",
-        float_format='%.2f',
-        justify='center'
+        float_format="%.2f",
+        index=False,
+        justify="center",
     )
     return table_html
