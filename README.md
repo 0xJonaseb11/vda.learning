@@ -23,7 +23,7 @@ vehicle_ml_dashboard/
 cd vehicle_ml_dashboard
 python -m venv venv
 venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Mac/Linux
+source venv/bin/activate   # Mac/Linux
 pip install -r requirements.txt
 ```
 

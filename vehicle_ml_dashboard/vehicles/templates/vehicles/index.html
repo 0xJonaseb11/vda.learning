@@ -1,69 +1,249 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Vehicle ML Dashboard</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle ML Dashboard | Analytics</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-      body {
-        background-color: #f4f6f9;
-      }
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
 
-      .scrollspy-example {
-        height: 80vh;
-        overflow-y: scroll;
-        position: relative;
-      }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
 
-      .nav-pills .nav-link.active {
-        background-color: #0d6efd;
-      }
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            padding: 2rem 1rem;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            width: 280px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: #0f172a;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        #frequency-table .table {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .chart-container {
+            min-height: 400px;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: static;
+                height: auto;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Micro-animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
     </style>
-  </head>
+</head>
 
-  <body
-    data-bs-spy="scroll"
-    data-bs-target="#dashboard-nav"
-    data-bs-offset="100"
-    tabindex="0"
-  >
-    <div class="container-fluid mt-4">
-      <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-3">
-          <div id="dashboard-nav" class="list-group position-sticky top-0">
-            <a
-              class="list-group-item list-group-item-action"
-              href="#frequency-table"
-              >Frequency Tables (One-way)
-            </a>
-          </div>
+<body data-bs-spy="scroll" data-bs-target="#sidebar-nav" data-bs-offset="50">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="mb-5 px-3">
+            <h4 class="fw-bold text-primary">VDA Analytics</h4>
+            <p class="text-muted small">Vehicle ML Dashboard</p>
         </div>
+        <div id="sidebar-nav" class="nav flex-column mb-auto">
+            <a class="nav-link active" href="#sales-distribution">Sales Distribution</a>
+            <a class="nav-link" href="#category-analysis">Category Analysis</a>
+            <a class="nav-link" href="#price-analysis">Price Analysis</a>
+            <a class="nav-link" href="#market-shares">Market Shares</a>
+            <a class="nav-link" href="#data-summary">Data Summary</a>
+        </div>
+    </nav>
 
-        <!-- Scrollable Content -->
-        <div class="col-md-9">
-          <div
-            class="scrollspy-example"
-            data-bs-spy="scroll"
-            data-bs-target="#dashboard-nav"
-            data-bs-smooth-scroll="true"
-            tabindex="0"
-          >
-            <h1 class="text-center text-primary mb-4">
-              Vehicle Machine Learning Dashboard
-            </h1>
-            <div id="frequency-table" class="card shadow mb-5">
-              <div class="card-header bg-info text-white">
-                Frequency Tables (One-way)
-              </div>
-              <div class="card-body">{{ frequency_table|safe }}</div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="dashboard-header animate-fade-in">
+            <h1>Vehicle Fleet Analytics</h1>
+            <p class="text-muted">Comprehensive overview of sales, pricing, and manufacturer distributions.</p>
+        </header>
+
+        <!-- Sunburst Chart Section -->
+        <section id="sales-distribution" class="animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="card">
+                <div class="card-header">Vehicle Sales Hierarchy (Sunburst)</div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">Drill down through Manufacturer → Fuel Type → Body Type to
+                        visualize sales performance.</p>
+                    <div class="chart-container">
+                        {{ sunburst_chart|safe }}
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
+
+        <!-- Category Counts Bar Chart Section -->
+        <section id="category-analysis" class="animate-fade-in" style="animation-delay: 0.15s;">
+            <div class="card">
+                <div class="card-header">Category Volume (Accounts)</div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">Distribution of vehicle inventory across different body types.</p>
+                    <div class="chart-container">
+                        {{ category_counts_chart|safe }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="row">
+            <!-- Price Distribution Section -->
+            <div class="col-lg-7">
+                <section id="price-analysis" class="animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="card">
+                        <div class="card-header">Price Distribution</div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                {{ price_dist_chart|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Manufacturer Shares Section -->
+            <div class="col-lg-5">
+                <section id="market-shares" class="animate-fade-in" style="animation-delay: 0.3s;">
+                    <div class="card">
+                        <div class="card-header">Manufacturer Composition</div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                {{ manufacturer_shares|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
-      </div>
-    </div>
+
+        <!-- Frequency Table Section -->
+        <section id="data-summary" class="animate-fade-in" style="animation-delay: 0.4s;">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Statistical Summary</span>
+                    <span class="badge bg-primary rounded-pill">By Manufacturer</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="frequency-table" class="table-responsive">
+                        {{ frequency_table|safe }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-5 py-4 text-center text-muted border-top">
+            <small>&copy; 2026 VDA Learning - Machine Learning Dashboard</small>
+        </footer>
+    </main>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+</body>
+
 </html>
